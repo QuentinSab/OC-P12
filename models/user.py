@@ -1,12 +1,6 @@
-from sqlalchemy import Column, Integer, String, Enum
-import enum
+from sqlalchemy import Column, Integer, String, ForeignKey
 from database.base import Base
-
-
-class Departement(enum.Enum):
-    COMMERCIAL = "COMMERCIAL"
-    SUPPORT = "SUPPORT"
-    GESTION = "GESTION"
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -17,12 +11,13 @@ class User(Base):
     name = Column(String(100), nullable=False)
     firstname = Column(String(100), nullable=False)
 
-    email = Column(String(255), unique=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False, index=True)
     phone = Column(String(20), nullable=False)
 
     password = Column(String(100), nullable=False)
 
-    departement = Column(Enum(Departement, name="departement_enum"), nullable=False)
+    departement_id = Column(Integer, ForeignKey("departements.id"), nullable=False)
+    departement = relationship("Departement", back_populates="users")
 
     def __repr__(self):
-        return f"<User {self.id} {self.email} ({self.departement.value})>"
+        return f"<User {self.id} {self.email}>"
