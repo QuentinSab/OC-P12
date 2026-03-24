@@ -11,18 +11,22 @@ class Departement(Base):
 
     # Permissions
     can_create_user = Column(Boolean, default=False)
+    can_read_user = Column(Boolean, default=False)
     can_modify_user = Column(Boolean, default=False)
     can_delete_user = Column(Boolean, default=False)
 
     can_create_client = Column(Boolean, default=False)
+    can_read_client = Column(Boolean, default=False)
     can_modify_client = Column(Boolean, default=False)
     can_delete_client = Column(Boolean, default=False)
 
     can_create_contract = Column(Boolean, default=False)
+    can_read_contract = Column(Boolean, default=False)
     can_modify_contract = Column(Boolean, default=False)
     can_delete_contract = Column(Boolean, default=False)
 
     can_create_event = Column(Boolean, default=False)
+    can_read_event = Column(Boolean, default=False)
     can_modify_event = Column(Boolean, default=False)
     can_delete_event = Column(Boolean, default=False)
 

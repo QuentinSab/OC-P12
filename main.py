@@ -9,6 +9,7 @@ def main():
     while True:
         user = None
 
+        # Authentication
         while not user:
             email, password = prompt_login()
             user = AuthenticationController.login(email, password)
@@ -18,14 +19,20 @@ def main():
 
         show_login_success()
         user_session = UserSession(user)
+        menu_controller = MenuController(user_session)
 
-        while True:
-            options = MenuController.get_menu_options(user_session)
+        # Main menu
+        while user_session.is_authenticated:
+
+            options = menu_controller.get_main_menu()
             choice = show_menu(user_session, options)
 
-            if choice == "logout":
-                user_session.is_authenticated = False
-                break
+            match choice:
+                case "1":
+                    pass
+                case "logout":
+                    user_session.logout()
+                    break
 
 
 if __name__ == "__main__":
