@@ -1,8 +1,13 @@
+from database.session import SessionLocal
+
 from controllers.authentication import AuthenticationController
 from controllers.session import UserSession
+from controllers.client import ClientController
 from controllers.menu import MenuController
+
 from views.authentication import prompt_login, show_login_error, show_login_success
 from views.menu import show_menu
+from views.client import prompt_create_client, show_client_creation_error, show_client_creation_success
 
 
 def main():
@@ -29,7 +34,20 @@ def main():
 
             match choice:
                 case "1":
-                    pass
+                    session = SessionLocal()
+
+                    client_controller = ClientController(user_session, session)
+
+                    data = prompt_create_client()
+                    success = client_controller.create_client(data)
+
+                    if success:
+                        show_client_creation_success()
+                    else:
+                        show_client_creation_error()
+
+                    session.close()
+
                 case "logout":
                     user_session.logout()
                     break

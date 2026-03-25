@@ -19,5 +19,7 @@ class User(Base):
     departement_id = Column(Integer, ForeignKey("departements.id"), nullable=False)
     departement = relationship("Departement", back_populates="users")
 
+    clients = relationship("Client", back_populates="contact")
+
     def __repr__(self):
         return f"<User {self.id} {self.email}>"
