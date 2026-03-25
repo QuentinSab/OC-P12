@@ -25,3 +25,12 @@ class ClientController:
         except Exception:
             self.session.rollback()
             return False
+
+    def get_clients(self):
+
+        try:
+            clients = self.session.query(Client).all()
+            return clients
+
+        except Exception:
+            return []

@@ -7,7 +7,7 @@ from controllers.menu import MenuController
 
 from views.authentication import prompt_login, show_login_error, show_login_success
 from views.menu import show_menu
-from views.client import prompt_create_client, show_client_creation_error, show_client_creation_success
+from views.client import prompt_create_client, show_client_creation_error, show_client_creation_success, show_clients
 
 
 def main():
@@ -33,9 +33,8 @@ def main():
             choice = show_menu(user_session, options)
 
             match choice:
-                case "1":
+                case "1":  # Client creation
                     session = SessionLocal()
-
                     client_controller = ClientController(user_session, session)
 
                     data = prompt_create_client()
@@ -45,6 +44,15 @@ def main():
                         show_client_creation_success()
                     else:
                         show_client_creation_error()
+
+                    session.close()
+
+                case "2":  # Clients list
+                    session = SessionLocal()
+                    client_controller = ClientController(user_session, session)
+
+                    clients = client_controller.get_clients()
+                    show_clients(clients)
 
                     session.close()
 

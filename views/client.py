@@ -2,7 +2,8 @@ from views.utils import Utils
 
 
 def prompt_create_client():
-    print("\n--- Création d'un client ---")
+    Utils.clear()
+    print("--- Création d'un client ---\n")
 
     full_name = input("Nom complet : ")
     email = input("Email : ")
@@ -26,4 +27,17 @@ def show_client_creation_error():
 
 def show_client_creation_success():
     print("\nLe client a été ajouté avec succès.")
+    Utils.temporisation()
+
+
+def show_clients(clients):
+    Utils.clear()
+    print("\n--- Liste des clients ---\n")
+
+    if not clients:
+        print("Aucun client trouvé.")
+    else:
+        for client in clients:
+            print(f"{client.id} : {client.full_name} | {client.email} | {client.company_name}")
+
     Utils.temporisation()
