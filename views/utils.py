@@ -14,5 +14,10 @@ class Utils:
     @staticmethod
     def temporisation():
         """Pause execution until the user make an input"""
-        print("")
-        input("Entrée pour continuer...")
+
+        input("\nEntrée pour continuer...")
+
+    @staticmethod
+    def show_permission_error():
+        print("\nVous n'avez pas les droits pour effectuer cette action.")
+        Utils.temporisation()

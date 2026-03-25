@@ -34,18 +34,24 @@ def show_clients(clients):
     Utils.clear()
     print("\n--- Liste des clients ---\n")
 
-    if not clients:
-        print("Aucun client trouvé.")
-    else:
-        for client in clients:
-            print(f"{client.id} : {client.full_name} | {client.email} | {client.company_name}")
+    for client in clients:
+        print(f"{client.id} : {client.full_name} | {client.email} | {client.company_name}")
 
     Utils.temporisation()
 
 
+def show_no_client_found():
+    print("Aucun client n'a été trouvé.")
+    Utils.temporisation()
+
+
 def prompt_client_id():
-    Utils.clear()
-    return input("ID du client à modifier : ")
+    while True:
+        Utils.clear()
+        value = input("ID du client à modifier : ").strip()
+
+        if value.isdigit():
+            return int(value)
 
 
 def prompt_update_client(client):

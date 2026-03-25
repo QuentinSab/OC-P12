@@ -5,7 +5,8 @@ from controllers.session import UserSession
 from controllers.client import ClientController
 from controllers.menu import MenuController
 
-from views.authentication import prompt_login, show_login_error, show_login_success
+from views.utils import Utils
+from views.authentication import prompt_login, show_login_error
 from views.menu import show_menu
 import views.client as client_view
 
@@ -22,7 +23,6 @@ def main():
             if not user:
                 show_login_error()
 
-        show_login_success()
         user_session = UserSession(user)
         menu_controller = MenuController(user_session)
 
@@ -38,11 +38,14 @@ def main():
                     client_controller = ClientController(user_session, session)
 
                     data = client_view.prompt_create_client()
-                    success = client_controller.create_client(data)
 
-                    if success:
+                    try:
+                        client_controller.create_client(data)
                         client_view.show_client_creation_success()
-                    else:
+
+                    except PermissionError:
+                        Utils.show_permission_error()
+                    except Exception:
                         client_view.show_client_creation_error()
 
                     session.close()
@@ -51,29 +54,36 @@ def main():
                     session = SessionLocal()
                     client_controller = ClientController(user_session, session)
 
-                    clients = client_controller.get_clients()
-                    client_view.show_clients(clients)
+                    try:
+                        clients = client_controller.get_clients()
+                        client_view.show_clients(clients)
+
+                    except PermissionError:
+                        Utils.show_permission_error()
+                    except Exception:
+                        client_view.show_no_client_found()
 
                     session.close()
 
                 case "3":  # Client update
                     session = SessionLocal()
-
                     client_controller = ClientController(user_session, session)
 
-                    client_id = client_view.prompt_client_id()
-                    client = client_controller.get_client_by_id(client_id)
+                    try:
+                        client_id = client_view.prompt_client_id()
+                        client = client_controller.get_client_by_id(client_id)
 
-                    if not client:
-                        client_view.show_client_not_found()
-                    else:
                         data = client_view.prompt_update_client(client)
-                        success = client_controller.update_client(client_id, data)
+                        client_controller.update_client(client_id, data)
 
-                        if success:
-                            client_view.show_client_modification_success()
-                        else:
-                            client_view.show_client_modification_error()
+                        client_view.show_client_modification_success()
+
+                    except PermissionError:
+                        Utils.show_permission_error()
+                    except ValueError:
+                        client_view.show_client_not_found()
+                    except Exception:
+                        client_view.show_client_modification_error()
 
                     session.close()
 

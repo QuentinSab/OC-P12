@@ -1,4 +1,5 @@
 from models.client import Client
+from utils.permissions import permission_required
 
 
 class ClientController:
@@ -7,6 +8,7 @@ class ClientController:
         self.user_session = user_session
         self.session = session
 
+    @permission_required("can_create_client")
     def create_client(self, data):
         try:
             client = Client(
@@ -20,26 +22,23 @@ class ClientController:
 
             self.session.add(client)
             self.session.commit()
-            return True
 
         except Exception:
             self.session.rollback()
-            return False
+            raise
 
+    @permission_required("can_read_client")
     def get_clients(self):
-        try:
-            clients = self.session.query(Client).all()
-            return clients
+        clients = self.session.query(Client).all()
+        return clients
 
-        except Exception:
-            return []
-
+    @permission_required("can_modify_client")
     def update_client(self, client_id, data):
         try:
             client = self.session.query(Client).filter_by(id=client_id).first()
 
             if not client:
-                return False
+                raise ValueError
 
             client.full_name = data["full_name"]
             client.email = data["email"]
@@ -49,11 +48,10 @@ class ClientController:
 
             self.session.commit()
 
-            return True
-
         except Exception:
             self.session.rollback()
-            return False
+            raise
 
+    @permission_required("can_read_client")
     def get_client_by_id(self, client_id):
         return self.session.query(Client).filter_by(id=client_id).first()
