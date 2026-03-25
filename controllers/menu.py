@@ -12,6 +12,9 @@ class MenuController:
         if self.user_session.has_permission("can_read_client"):
             options.append(("2", "Voir la liste des clients"))
 
+        if self.user_session.has_permission("can_modify_client"):
+            options.append(("3", "Modifier un client"))
+
         options.append(("0", "Déconnexion"))
 
         return options

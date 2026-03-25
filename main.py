@@ -7,7 +7,7 @@ from controllers.menu import MenuController
 
 from views.authentication import prompt_login, show_login_error, show_login_success
 from views.menu import show_menu
-from views.client import prompt_create_client, show_client_creation_error, show_client_creation_success, show_clients
+import views.client as client_view
 
 
 def main():
@@ -37,13 +37,13 @@ def main():
                     session = SessionLocal()
                     client_controller = ClientController(user_session, session)
 
-                    data = prompt_create_client()
+                    data = client_view.prompt_create_client()
                     success = client_controller.create_client(data)
 
                     if success:
-                        show_client_creation_success()
+                        client_view.show_client_creation_success()
                     else:
-                        show_client_creation_error()
+                        client_view.show_client_creation_error()
 
                     session.close()
 
@@ -52,7 +52,28 @@ def main():
                     client_controller = ClientController(user_session, session)
 
                     clients = client_controller.get_clients()
-                    show_clients(clients)
+                    client_view.show_clients(clients)
+
+                    session.close()
+
+                case "3":  # Client update
+                    session = SessionLocal()
+
+                    client_controller = ClientController(user_session, session)
+
+                    client_id = client_view.prompt_client_id()
+                    client = client_controller.get_client_by_id(client_id)
+
+                    if not client:
+                        client_view.show_client_not_found()
+                    else:
+                        data = client_view.prompt_update_client(client)
+                        success = client_controller.update_client(client_id, data)
+
+                        if success:
+                            client_view.show_client_modification_success()
+                        else:
+                            client_view.show_client_modification_error()
 
                     session.close()
 

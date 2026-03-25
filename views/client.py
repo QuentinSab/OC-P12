@@ -41,3 +41,44 @@ def show_clients(clients):
             print(f"{client.id} : {client.full_name} | {client.email} | {client.company_name}")
 
     Utils.temporisation()
+
+
+def prompt_client_id():
+    Utils.clear()
+    return input("ID du client à modifier : ")
+
+
+def prompt_update_client(client):
+    Utils.clear()
+    print(f"--- Modification du client : {client.full_name} ---\n")
+
+    full_name = input(f"Nom complet ({client.full_name}) : ").strip()
+    email = input(f"Email ({client.email}) : ").strip()
+    phone = input(f"Téléphone ({client.phone}) : ").strip()
+    company_name = input(f"Entreprise ({client.company_name}) : ").strip()
+    information = input(f"Infos ({client.information}) : ").strip()
+
+    print("")
+
+    return {
+        "full_name": full_name or client.full_name,
+        "email": email or client.email,
+        "phone": phone or client.phone,
+        "company_name": company_name or client.company_name,
+        "information": information or client.information
+    }
+
+
+def show_client_not_found():
+    print("Client introuvable.")
+    Utils.temporisation()
+
+
+def show_client_modification_success():
+    print("Client modifié avec succès.")
+    Utils.temporisation()
+
+
+def show_client_modification_error():
+    print("Erreur lors de la modification du client.")
+    Utils.temporisation()
