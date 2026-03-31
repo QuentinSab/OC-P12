@@ -32,17 +32,29 @@ def show_client_creation_success():
 
 def show_clients(clients):
     Utils.clear()
-    print("\n--- Liste des clients ---\n")
+    print("--- Liste des clients ---\n")
 
     for client in clients:
-        print(f"{client.id} : {client.full_name} | {client.email} | {client.company_name}")
+        contact_name = f"{client.contact.firstname} {client.contact.name}"
 
+        print(
+            f"{client.id} : {client.full_name} | "
+            f"{client.email} | "
+            f"{client.company_name} | "
+            f"{contact_name}"
+        )
+
+    Utils.temporisation()
+
+
+def show_no_client_found():
+    print("\nAucun client n'a été trouvé.")
     Utils.temporisation()
 
 
 def show_client_detail(client):
     Utils.clear()
-    print("\n--- Détail du client ---\n")
+    print("--- Détail du client ---\n")
 
     print(f"ID: {client.id}")
     print(f"Nom: {client.full_name}")
@@ -57,11 +69,6 @@ def show_client_detail(client):
     Utils.temporisation()
 
 
-def show_no_client_found():
-    print("Aucun client n'a été trouvé.")
-    Utils.temporisation()
-
-
 def prompt_client_id():
     while True:
         Utils.clear()
@@ -69,6 +76,11 @@ def prompt_client_id():
 
         if value.isdigit():
             return int(value)
+
+
+def show_client_not_found():
+    print("\nClient introuvable.")
+    Utils.temporisation()
 
 
 def prompt_update_client(client):
@@ -81,8 +93,6 @@ def prompt_update_client(client):
     company_name = input(f"Entreprise ({client.company_name}) : ").strip()
     information = input(f"Infos ({client.information}) : ").strip()
 
-    print("")
-
     return {
         "full_name": full_name or client.full_name,
         "email": email or client.email,
@@ -92,16 +102,11 @@ def prompt_update_client(client):
     }
 
 
-def show_client_not_found():
-    print("Client introuvable.")
+def show_client_modification_error():
+    print("\nErreur lors de la modification du client.")
     Utils.temporisation()
 
 
 def show_client_modification_success():
-    print("Client modifié avec succès.")
-    Utils.temporisation()
-
-
-def show_client_modification_error():
-    print("Erreur lors de la modification du client.")
+    print("\nClient modifié avec succès.")
     Utils.temporisation()

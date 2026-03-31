@@ -45,15 +45,20 @@ class ClientController:
 
     @permission_required("can_read_client")
     def get_client_by_id(self, client_id):
-        return self.session.query(Client).filter_by(id=client_id).first()
+        client = self.session.query(Client).filter_by(id=client_id).first()
+
+        if not client:
+            raise ValueError
+
+        return client
 
     @permission_required("can_modify_client")
     def update_client(self, client_id, data):
         try:
             client = self.session.query(Client).filter_by(id=client_id).first()
 
-            if not client:
-                raise ValueError
+            if client.contact_id != self.user_session.user.id:
+                raise PermissionError
 
             client.full_name = data["full_name"]
             client.email = data["email"]
@@ -70,14 +75,14 @@ class ClientController:
     def get_options(self):
         options = []
 
+        if self.user_session.has_permission("can_read_client"):
+            options.append(("1", "Voir la liste des clients"))
+
+        if self.user_session.has_permission("can_read_client"):
+            options.append(("2", "Voir les détails d'un client"))
+
         if self.user_session.has_permission("can_create_client"):
-            options.append(("1", "Ajouter un client"))
-
-        if self.user_session.has_permission("can_read_client"):
-            options.append(("2", "Voir la liste des clients"))
-
-        if self.user_session.has_permission("can_read_client"):
-            options.append(("3", "Voir les détails d'un client"))
+            options.append(("3", "Ajouter un client"))
 
         if self.user_session.has_permission("can_modify_client"):
             options.append(("4", "Modifier un client"))
@@ -92,11 +97,11 @@ class ClientController:
 
             match choice:
                 case "1":
-                    self.create_client_action()
-                case "2":
                     self.list_clients_action()
-                case "3":
+                case "2":
                     self.show_client_action()
+                case "3":
+                    self.create_client_action()
                 case "4":
                     self.update_client_action()
                 case "0":
@@ -131,15 +136,14 @@ class ClientController:
 
         except PermissionError:
             Utils.show_permission_error()
-        except ValueError:
-            client_view.show_client_not_found()
         except Exception:
-            client_view.show_no_client_found()
+            client_view.show_client_not_found()
 
     def update_client_action(self):
         try:
             client_id = client_view.prompt_client_id()
             client = self.get_client_by_id(client_id)
+
             data = client_view.prompt_update_client(client)
             self.update_client(client_id, data)
             client_view.show_client_modification_success()

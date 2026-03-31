@@ -15,8 +15,7 @@ def main():
         # Main menu
         while user_session.is_authenticated:
 
-            options = menu_controller.get_options()
-            choice = show_menu(user_session, options)
+            choice = show_menu(user_session, menu_controller.get_options())
 
             match choice:
                 case "1":  # Client
