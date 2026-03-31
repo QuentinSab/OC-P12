@@ -40,6 +40,23 @@ def show_clients(clients):
     Utils.temporisation()
 
 
+def show_client_detail(client):
+    Utils.clear()
+    print("\n--- Détail du client ---\n")
+
+    print(f"ID: {client.id}")
+    print(f"Nom: {client.full_name}")
+    print(f"Email: {client.email}")
+    print(f"Téléphone: {client.phone}")
+    print(f"Société: {client.company_name}")
+    print(f"Information: {client.information}")
+    print(f"Créé le: {client.created_at}")
+    print(f"Modifié le: {client.updated_at}")
+    print(f"Contact interne: {client.contact.firstname} {client.contact.name}")
+
+    Utils.temporisation()
+
+
 def show_no_client_found():
     print("Aucun client n'a été trouvé.")
     Utils.temporisation()
@@ -48,7 +65,7 @@ def show_no_client_found():
 def prompt_client_id():
     while True:
         Utils.clear()
-        value = input("ID du client à modifier : ").strip()
+        value = input("ID du client à selectionner : ").strip()
 
         if value.isdigit():
             return int(value)

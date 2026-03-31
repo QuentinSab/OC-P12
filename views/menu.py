@@ -14,7 +14,4 @@ def show_menu(user_session, options):
 
     choice = input("\nChoix: ")
 
-    if choice == "0":
-        return "logout"
-
     return choice
