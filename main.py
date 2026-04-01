@@ -1,5 +1,6 @@
 from controllers.authentication import AuthenticationController
 from controllers.client import ClientController
+from controllers.user import UserController
 from controllers.menu import MenuController
 
 from views.menu import show_menu
@@ -21,6 +22,10 @@ def main():
                 case "1":  # Client
                     with ClientController(user_session) as client_controller:
                         client_controller.client_menu()
+
+                case "4":  # User
+                    with UserController(user_session) as user_controller:
+                        user_controller.user_menu()
 
                 case "0":
                     user_session.logout()

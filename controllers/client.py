@@ -53,10 +53,8 @@ class ClientController:
         return client
 
     @permission_required("can_modify_client")
-    def update_client(self, client_id, data):
+    def update_client(self, client, data):
         try:
-            client = self.session.query(Client).filter_by(id=client_id).first()
-
             if client.contact_id != self.user_session.user.id:
                 raise PermissionError
 
@@ -145,7 +143,7 @@ class ClientController:
             client = self.get_client_by_id(client_id)
 
             data = client_view.prompt_update_client(client)
-            self.update_client(client_id, data)
+            self.update_client(client, data)
             client_view.show_client_modification_success()
 
         except PermissionError:

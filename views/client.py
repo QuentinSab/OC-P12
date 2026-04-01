@@ -5,11 +5,11 @@ def prompt_create_client():
     Utils.clear()
     print("--- Création d'un client ---\n")
 
-    full_name = input("Nom complet : ")
-    email = input("Email : ")
-    phone = input("Téléphone : ")
-    company_name = input("Nom de l'entreprise : ")
-    information = input("Informations (optionnel) : ")
+    full_name = input("Nom complet : ").strip()
+    email = input("Email : ").strip()
+    phone = input("Téléphone : ").strip()
+    company_name = input("Nom de l'entreprise : ").strip()
+    information = input("Informations (optionnel) : ").strip()
 
     return {
         "full_name": full_name,
