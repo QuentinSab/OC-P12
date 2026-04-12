@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Boolean, DateTime, ForeignKey, Float
+from sqlalchemy import Column, Integer, Boolean, DateTime, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -13,12 +13,15 @@ class Contract(Base):
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     client = relationship("Client", back_populates="contracts")
 
-    total_amount = Column(Float, nullable=False)
-    remaining_amount = Column(Float, nullable=False)
+    total_amount = Column(Numeric(12, 2), nullable=False)
+    payed_amount = Column(Numeric(12, 2), default=0, nullable=False)
 
     is_signed = Column(Boolean, default=False, nullable=False)
-    signed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
 
     def __repr__(self):
         return f"<Contrat #{self.id} - Client {self.client_id} - Signé: {self.is_signed}>"
+
+    @property
+    def remaining_amount(self):
+        return self.total_amount - self.payed_amount
