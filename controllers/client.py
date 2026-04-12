@@ -41,20 +41,21 @@ class ClientController:
             clients = self.session.query(Client).all()
 
             if not clients:
-                self.view.show_no_client_found()
-                return
+                raise ValueError
 
             self.view.show_clients(clients)
 
-        except Exception:
+        except ValueError:
             self.view.show_no_client_found()
+        except Exception:
+            self.view.show_client_list_error()
 
     @permission_required("can_read_client")
     def show_client(self):
         try:
             client_id = self.view.prompt_client_id()
-
             client = self.session.query(Client).filter_by(id=client_id).first()
+
             if not client:
                 raise ValueError
 
@@ -63,7 +64,7 @@ class ClientController:
         except ValueError:
             self.view.show_client_not_found()
         except Exception:
-            self.view.show_client_not_found()
+            self.view.show_client_detail_error()
 
     @permission_required("can_modify_client")
     def update_client(self):
@@ -74,7 +75,8 @@ class ClientController:
             if not client:
                 raise ValueError
             if client.contact_id != self.user_session.user.id:
-                raise PermissionError
+                self.view.show_not_client_contact_error()
+                return
 
             data = self.view.prompt_update_client(client)
 
@@ -87,8 +89,6 @@ class ClientController:
             self.session.commit()
             self.view.show_client_modification_success()
 
-        except PermissionError:
-            Utils.show_permission_error()
         except ValueError:
             self.view.show_client_not_found()
         except Exception:

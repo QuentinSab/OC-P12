@@ -48,6 +48,10 @@ class ClientView:
         print("\nAucun client n'a été trouvé.")
         Utils.temporisation()
 
+    def show_client_list_error(self):
+        print("\nUne erreur s'est produite lors de la récupération de la liste des clients.")
+        Utils.temporisation()
+
     def show_client_detail(self, client):
         Utils.clear()
         print("--- Détail du client ---\n")
@@ -76,6 +80,10 @@ class ClientView:
         print("\nClient introuvable.")
         Utils.temporisation()
 
+    def show_client_detail_error(self):
+        print("\nUne erreur s'est produite lors de la récupération des informations du client.")
+        Utils.temporisation()
+
     def prompt_update_client(self, client):
         Utils.clear()
         print(f"--- Modification du client : {client.full_name} ---\n")
@@ -93,6 +101,10 @@ class ClientView:
             "company_name": company_name or client.company_name,
             "information": information or client.information
         }
+
+    def show_not_client_contact_error(self):
+        print("\nModification impossible, vous n'êtes pas le contact de ce client.")
+        Utils.temporisation()
 
     def show_client_modification_error(self):
         print("\nErreur lors de la modification du client.")

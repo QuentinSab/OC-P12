@@ -44,13 +44,14 @@ class UserController:
             users = self.session.query(User).options(joinedload(User.departement)).all()
 
             if not users:
-                self.view.show_no_user_found()
-                return
+                raise ValueError
 
             self.view.show_users(users)
 
-        except Exception:
+        except ValueError:
             self.view.show_no_user_found()
+        except Exception:
+            self.view.show_user_list_error()
 
     @permission_required("can_read_user")
     def show_user(self):
@@ -66,7 +67,7 @@ class UserController:
         except ValueError:
             self.view.show_user_not_found()
         except Exception:
-            self.view.show_user_not_found()
+            self.view.show_user_detail_error()
 
     @permission_required("can_modify_user")
     def update_user(self):
@@ -80,7 +81,8 @@ class UserController:
             data = self.view.prompt_update_user(user)
 
             if user.departement_id != data["departement_id"] and user.clients:
-                raise Exception
+                self.view.show_user_has_client_error()
+                return
 
             user.name = data["name"]
             user.firstname = data["firstname"]
@@ -112,7 +114,8 @@ class UserController:
                 self.view.show_user_deletion_cancel()
                 return
             if user.clients:
-                raise Exception
+                self.view.show_user_has_client_error()
+                return
 
             self.session.delete(user)
             self.session.commit()

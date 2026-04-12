@@ -48,6 +48,10 @@ class UserView:
         print("\nAucun utilisateur n'a été trouvé.")
         Utils.temporisation()
 
+    def show_user_list_error(self):
+        print("\nUne erreur s'est produite lors de la récupération de la liste des utilisateurs.")
+        Utils.temporisation()
+
     def show_user_detail(self, user):
         Utils.clear()
         print("--- Détail de l'utilisateur ---\n")
@@ -73,6 +77,10 @@ class UserView:
         print("\nUtilisateur introuvable.")
         Utils.temporisation()
 
+    def show_user_detail_error(self):
+        print("\nUne erreur s'est produite lors de la récupération des informations de l'utilisateur.")
+        Utils.temporisation()
+
     def prompt_update_user(self, user):
         Utils.clear()
         print(f"--- Modification de l'utilisateur : {user.firstname} {user.name} ---\n")
@@ -81,7 +89,9 @@ class UserView:
         name = input(f"Nom ({user.name}) : ").strip()
         email = input(f"Email ({user.email}) : ").strip()
         phone = input(f"Téléphone ({user.phone}) : ").strip()
-        departement_id = input(f"ID du département ({user.departement.name}) : ").strip()
+        departement_id = input(
+            f"ID du département (GESTION - 1, COMMERCIAL - 2, SUPPORT - 3) ({user.departement.name}): "
+        ).strip()
 
         return {
             "firstname": firstname or user.firstname,
@@ -93,6 +103,10 @@ class UserView:
 
     def show_user_modification_error(self):
         print("\nErreur lors de la modification de l'utilisateur.")
+        Utils.temporisation()
+
+    def show_user_has_client_error(self):
+        print("\nAction impossible, l'utilisateur est le contact d'un client.")
         Utils.temporisation()
 
     def show_user_modification_success(self):
