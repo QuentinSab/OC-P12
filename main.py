@@ -1,4 +1,5 @@
 from controllers.authentication import AuthenticationController
+from controllers.contract import ContractController
 from controllers.client import ClientController
 from controllers.user import UserController
 
@@ -18,6 +19,10 @@ def main():
                 case "1":  # Client
                     with ClientController(user_session) as client_controller:
                         client_controller.client_menu()
+
+                case "2":  # Contract
+                    with ContractController(user_session) as contract_controller:
+                        contract_controller.contract_menu()
 
                 case "4":  # User
                     with UserController(user_session) as user_controller:

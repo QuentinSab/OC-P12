@@ -29,5 +29,7 @@ class Client(Base):
     contact_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     contact = relationship("User", back_populates="clients")
 
+    contracts = relationship("Contract", back_populates="client")
+
     def __repr__(self):
         return f"<Client {self.full_name} ({self.email})>"
