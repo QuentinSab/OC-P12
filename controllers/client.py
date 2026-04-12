@@ -2,15 +2,15 @@ from models.client import Client
 from database.session import SessionLocal
 from utils.permissions import permission_required
 
-from views.menu import show_menu
 from views.utils import Utils
-import views.client as client_view
+from views.client import ClientView
 
 
 class ClientController:
     def __init__(self, user_session):
         self.user_session = user_session
         self.session = None
+        self.view = ClientView()
 
     def __enter__(self):
         self.session = SessionLocal()
@@ -20,43 +20,63 @@ class ClientController:
         self.session.close()
 
     @permission_required("can_create_client")
-    def create_client(self, data):
+    def create_client(self):
         try:
-            client = Client(
-                full_name=data["full_name"],
-                email=data["email"],
-                phone=data["phone"],
-                company_name=data["company_name"],
-                information=data["information"],
-                contact_id=self.user_session.user.id
-            )
+            data = self.view.prompt_create_client()
+
+            data["contact_id"] = self.user_session.user.id
+            client = Client(**data)
 
             self.session.add(client)
             self.session.commit()
+            self.view.show_client_creation_success()
 
         except Exception:
             self.session.rollback()
-            raise
+            self.view.show_client_creation_error()
 
     @permission_required("can_read_client")
-    def get_clients(self):
-        clients = self.session.query(Client).all()
-        return clients
+    def list_clients(self):
+        try:
+            clients = self.session.query(Client).all()
+
+            if not clients:
+                self.view.show_no_client_found()
+                return
+
+            self.view.show_clients(clients)
+
+        except Exception:
+            self.view.show_no_client_found()
 
     @permission_required("can_read_client")
-    def get_client_by_id(self, client_id):
-        client = self.session.query(Client).filter_by(id=client_id).first()
+    def show_client(self):
+        try:
+            client_id = self.view.prompt_client_id()
 
-        if not client:
-            raise ValueError
+            client = self.session.query(Client).filter_by(id=client_id).first()
+            if not client:
+                raise ValueError
 
-        return client
+            self.view.show_client_detail(client)
+
+        except ValueError:
+            self.view.show_client_not_found()
+        except Exception:
+            self.view.show_client_not_found()
 
     @permission_required("can_modify_client")
-    def update_client(self, client, data):
+    def update_client(self):
         try:
+            client_id = self.view.prompt_client_id()
+            client = self.session.query(Client).filter_by(id=client_id).first()
+
+            if not client:
+                raise ValueError
             if client.contact_id != self.user_session.user.id:
                 raise PermissionError
+
+            data = self.view.prompt_update_client(client)
 
             client.full_name = data["full_name"]
             client.email = data["email"]
@@ -65,90 +85,32 @@ class ClientController:
             client.information = data["information"]
 
             self.session.commit()
-
-        except Exception:
-            self.session.rollback()
-            raise
-
-    def get_options(self):
-        options = []
-
-        if self.user_session.has_permission("can_read_client"):
-            options.append(("1", "Voir la liste des clients"))
-
-        if self.user_session.has_permission("can_read_client"):
-            options.append(("2", "Voir les détails d'un client"))
-
-        if self.user_session.has_permission("can_create_client"):
-            options.append(("3", "Ajouter un client"))
-
-        if self.user_session.has_permission("can_modify_client"):
-            options.append(("4", "Modifier un client"))
-
-        options.append(("0", "Retour"))
-        return options
-
-    def client_menu(self):
-        while True:
-            options = self.get_options()
-            choice = show_menu(self.user_session, options)
-
-            match choice:
-                case "1":
-                    self.list_clients_action()
-                case "2":
-                    self.show_client_action()
-                case "3":
-                    self.create_client_action()
-                case "4":
-                    self.update_client_action()
-                case "0":
-                    break
-
-    def create_client_action(self):
-        try:
-            data = client_view.prompt_create_client()
-            self.create_client(data)
-            client_view.show_client_creation_success()
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except Exception:
-            client_view.show_client_creation_error()
-
-    def list_clients_action(self):
-        try:
-            clients = self.get_clients()
-            client_view.show_clients(clients)
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except Exception:
-            client_view.show_no_client_found()
-
-    def show_client_action(self):
-        try:
-            client_id = client_view.prompt_client_id()
-            client = self.get_client_by_id(client_id)
-            client_view.show_client_detail(client)
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except Exception:
-            client_view.show_client_not_found()
-
-    def update_client_action(self):
-        try:
-            client_id = client_view.prompt_client_id()
-            client = self.get_client_by_id(client_id)
-
-            data = client_view.prompt_update_client(client)
-            self.update_client(client, data)
-            client_view.show_client_modification_success()
+            self.view.show_client_modification_success()
 
         except PermissionError:
             Utils.show_permission_error()
         except ValueError:
-            client_view.show_client_not_found()
+            self.view.show_client_not_found()
         except Exception:
-            client_view.show_client_modification_error()
+            self.session.rollback()
+            self.view.show_client_modification_error()
+
+    def client_menu(self):
+        while True:
+            choice = self.view.client_options(self.user_session)
+
+            try:
+                match choice:
+                    case "1":
+                        self.list_clients()
+                    case "2":
+                        self.show_client()
+                    case "3":
+                        self.create_client()
+                    case "4":
+                        self.update_client()
+                    case "0":
+                        break
+
+            except PermissionError:
+                Utils.show_permission_error()

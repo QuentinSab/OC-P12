@@ -1,9 +1,8 @@
 from controllers.authentication import AuthenticationController
 from controllers.client import ClientController
 from controllers.user import UserController
-from controllers.menu import MenuController
 
-from views.menu import show_menu
+from views.menu import main_options
 
 
 def main():
@@ -11,12 +10,9 @@ def main():
         authentication_controller = AuthenticationController()
         user_session = authentication_controller.login()
 
-        menu_controller = MenuController()
-
         # Main menu
         while user_session.is_authenticated:
-
-            choice = show_menu(user_session, menu_controller.get_options())
+            choice = main_options(user_session)
 
             match choice:
                 case "1":  # Client

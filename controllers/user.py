@@ -5,15 +5,15 @@ from database.session import SessionLocal
 from utils.permissions import permission_required
 from utils.password import hash_password
 
-from views.menu import show_menu
 from views.utils import Utils
-import views.user as user_view
+from views.user import UserView
 
 
 class UserController:
     def __init__(self, user_session):
         self.user_session = user_session
         self.session = None
+        self.view = UserView()
 
     def __enter__(self):
         self.session = SessionLocal()
@@ -23,42 +23,63 @@ class UserController:
         self.session.close()
 
     @permission_required("can_create_user")
-    def create_user(self, data):
+    def create_user(self):
         try:
-            user = User(
-                name=data["name"],
-                firstname=data["firstname"],
-                email=data["email"],
-                phone=data["phone"],
-                password=hash_password(data["password"]),
-                departement_id=data["departement_id"],
-            )
+            data = self.view.prompt_create_user()
+
+            data["password"] = hash_password(data["password"])
+            user = User(**data)
 
             self.session.add(user)
             self.session.commit()
+            self.view.show_user_creation_success()
 
         except Exception:
             self.session.rollback()
-            raise
+            self.view.show_user_creation_error()
 
     @permission_required("can_read_user")
-    def get_users(self):
-        users = self.session.query(User).options(joinedload(User.departement)).all()
-        return users
+    def list_users(self):
+        try:
+            users = self.session.query(User).options(joinedload(User.departement)).all()
+
+            if not users:
+                self.view.show_no_user_found()
+                return
+
+            self.view.show_users(users)
+
+        except Exception:
+            self.view.show_no_user_found()
 
     @permission_required("can_read_user")
-    def get_user_by_id(self, user_id):
-        user = self.session.query(User).filter_by(id=user_id).first()
+    def show_user(self):
+        try:
+            user_id = self.view.prompt_user_id()
+            user = self.session.query(User).filter_by(id=user_id).first()
 
-        if not user:
-            raise ValueError
+            if not user:
+                raise ValueError
 
-        return user
+            self.view.show_user_detail(user)
+
+        except ValueError:
+            self.view.show_user_not_found()
+        except Exception:
+            self.view.show_user_not_found()
 
     @permission_required("can_modify_user")
-    def update_user(self, user, data):
+    def update_user(self):
         try:
-            if (user.departement_id != data["departement_id"] and user.clients):
+            user_id = self.view.prompt_user_id()
+            user = self.session.query(User).filter_by(id=user_id).first()
+
+            if not user:
+                raise ValueError
+
+            data = self.view.prompt_update_user(user)
+
+            if user.departement_id != data["departement_id"] and user.clients:
                 raise Exception
 
             user.name = data["name"]
@@ -71,127 +92,56 @@ class UserController:
                 user.password = hash_password(data["password"])
 
             self.session.commit()
+            self.view.show_user_modification_success()
 
+        except ValueError:
+            self.view.show_user_not_found()
         except Exception:
             self.session.rollback()
-            raise
+            self.view.show_user_modification_error()
 
     @permission_required("can_delete_user")
-    def delete_user(self, user):
+    def delete_user(self):
         try:
+            user_id = self.view.prompt_user_id()
+            user = self.session.query(User).filter_by(id=user_id).first()
+
+            if not user:
+                raise ValueError
+            if not self.view.confirm_user_deletion(user):
+                self.view.show_user_deletion_cancel()
+                return
             if user.clients:
                 raise Exception
 
             self.session.delete(user)
             self.session.commit()
+            self.view.show_user_deletion_success()
 
+        except ValueError:
+            self.view.show_user_not_found()
         except Exception:
             self.session.rollback()
-            raise
-
-    def get_options(self):
-        options = []
-
-        if self.user_session.has_permission("can_read_user"):
-            options.append(("1", "Voir la liste des utilisateurs"))
-
-        if self.user_session.has_permission("can_read_user"):
-            options.append(("2", "Voir les détails d'un utilisateur"))
-
-        if self.user_session.has_permission("can_create_user"):
-            options.append(("3", "Ajouter un utilisateur"))
-
-        if self.user_session.has_permission("can_modify_user"):
-            options.append(("4", "Modifier un utilisateur"))
-
-        if self.user_session.has_permission("can_delete_user"):
-            options.append(("5", "Supprimer un utilisateur"))
-
-        options.append(("0", "Retour"))
-        return options
+            self.view.show_user_deletion_error()
 
     def user_menu(self):
         while True:
-            options = self.get_options()
-            choice = show_menu(self.user_session, options)
+            choice = self.view.user_options(self.user_session)
 
-            match choice:
-                case "1":
-                    self.list_users_action()
-                case "2":
-                    self.show_user_action()
-                case "3":
-                    self.create_user_action()
-                case "4":
-                    self.update_user_action()
-                case "5":
-                    self.delete_user_action()
-                case "0":
-                    break
+            try:
+                match choice:
+                    case "1":
+                        self.list_users()
+                    case "2":
+                        self.show_user()
+                    case "3":
+                        self.create_user()
+                    case "4":
+                        self.update_user()
+                    case "5":
+                        self.delete_user()
+                    case "0":
+                        break
 
-    def create_user_action(self):
-        try:
-            data = user_view.prompt_create_user()
-            self.create_user(data)
-            user_view.show_user_creation_success()
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except Exception:
-            user_view.show_user_creation_error()
-
-    def list_users_action(self):
-        try:
-            users = self.get_users()
-            user_view.show_users(users)
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except Exception:
-            user_view.show_no_user_found()
-
-    def show_user_action(self):
-        try:
-            user_id = user_view.prompt_user_id()
-            user = self.get_user_by_id(user_id)
-            user_view.show_user_detail(user)
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except Exception:
-            user_view.show_user_not_found()
-
-    def update_user_action(self):
-        try:
-            user_id = user_view.prompt_user_id()
-            user = self.get_user_by_id(user_id)
-
-            data = user_view.prompt_update_user(user)
-            self.update_user(user, data)
-            user_view.show_user_modification_success()
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except ValueError:
-            user_view.show_user_not_found()
-        except Exception:
-            user_view.show_user_modification_error()
-
-    def delete_user_action(self):
-        try:
-            user_id = user_view.prompt_user_id()
-            user = self.get_user_by_id(user_id)
-
-            if not user_view.confirm_user_deletion(user):
-                user_view.show_user_deletion_cancel()
-                return
-
-            self.delete_user(user)
-            user_view.show_user_deletion_success()
-
-        except PermissionError:
-            Utils.show_permission_error()
-        except ValueError:
-            user_view.show_user_not_found()
-        except Exception:
-            user_view.show_user_deletion_error()
+            except PermissionError:
+                Utils.show_permission_error()
