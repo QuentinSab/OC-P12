@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from database.base import Base
 from sqlalchemy.orm import relationship
+
+from database.base import Base
 
 
 class User(Base):
@@ -20,6 +21,7 @@ class User(Base):
     departement = relationship("Departement", back_populates="users")
 
     clients = relationship("Client", back_populates="contact")
+    events = relationship("Event", back_populates="support_contact")
 
     def __repr__(self):
         return f"<User {self.id} {self.email}>"
