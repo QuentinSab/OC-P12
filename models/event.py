@@ -9,10 +9,10 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True)
 
-    client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
-    client = relationship("Client", back_populates="events")
+    contract_id = Column(Integer, ForeignKey("contracts.id"), nullable=False)
+    contract = relationship("Contract", back_populates="events")
 
-    support_contact_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    support_contact_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     support_contact = relationship("User", back_populates="events")
 
     start_date = Column(DateTime, nullable=False)
@@ -23,4 +23,4 @@ class Event(Base):
     information = Column(Text, nullable=True)
 
     def __repr__(self):
-        return f"<Event #{self.id} - Client {self.client_id} - {self.start_date} → {self.end_date}>"
+        return (f"<Event #{self.id} - Contract {self.contract_id} - Date {self.start_date} → {self.end_date}>")

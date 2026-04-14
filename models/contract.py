@@ -19,6 +19,8 @@ class Contract(Base):
     is_signed = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
 
+    events = relationship("Event", back_populates="contract")
+
     def __repr__(self):
         return f"<Contrat #{self.id} - Client {self.client_id} - Signé: {self.is_signed}>"
 

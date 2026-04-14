@@ -29,7 +29,6 @@ class Client(Base):
     )
 
     contracts = relationship("Contract", back_populates="client")
-    events = relationship("Event", back_populates="client")
 
     def __repr__(self):
         return f"<Client {self.full_name} ({self.email})>"
