@@ -1,4 +1,6 @@
 from models.event import Event
+from models.contract import Contract
+from models.user import User
 from database.session import SessionLocal
 from utils.permissions import permission_required
 
@@ -24,12 +26,25 @@ class EventController:
         try:
             data = self.view.prompt_create_event()
 
+            contract = self.session.query(Contract).filter_by(id=data["contract_id"]).first()
+
+            if not contract:
+                raise ValueError
+            if contract.client.contact_id != self.user_session.user.id:
+                self.view.show_not_client_contact_error()
+                return
+            if not contract.is_signed:
+                self.view.show_contract_not_signed_error()
+                return
+
             event = Event(**data)
 
             self.session.add(event)
             self.session.commit()
             self.view.show_event_creation_success()
 
+        except ValueError:
+            self.view.show_contract_not_found()
         except Exception:
             self.session.rollback()
             self.view.show_event_creation_error()
@@ -74,14 +89,24 @@ class EventController:
             if not event:
                 raise ValueError
 
-            data = self.view.prompt_update_event(event)
+            user_session_departement = self.user_session.user.departement.name
+            if user_session_departement == "GESTION":
+                data = self.view.prompt_assign_event_support(event)
 
-            event.contract_id = data["contract_id"]
-            event.start_date = data["start_date"]
-            event.end_date = data["end_date"]
-            event.location = data["location"]
-            event.attendees = data["attendees"]
-            event.information = data["information"]
+                selected_user = (self.session.query(User).filter_by(id=data["support_contact_id"]).first())
+                if (selected_user.departement.name != "SUPPORT"):
+                    self.view.show_not_support_user_error()
+                    return
+
+                event.support_contact_id = data["support_contact_id"]
+
+            elif user_session_departement == "SUPPORT":
+                data = self.view.prompt_update_event(event)
+                event.start_date = data["start_date"]
+                event.end_date = data["end_date"]
+                event.location = data["location"]
+                event.attendees = data["attendees"]
+                event.information = data["information"]
 
             self.session.commit()
             self.view.show_event_modification_success()

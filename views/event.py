@@ -26,6 +26,18 @@ class EventView:
         print("\nUne erreur s'est produite lors de la création de l'évènement.")
         Utils.temporisation()
 
+    def show_not_client_contact_error(self):
+        print("\nCréation de l'évènement impossible, vous n'êtes pas le contact client du client de ce contrat.")
+        Utils.temporisation()
+
+    def show_contract_not_found(self):
+        print("\nContrat introuvable.")
+        Utils.temporisation()
+
+    def show_contract_not_signed_error(self):
+        print("\nCréation de l'évènement impossible, le contrat sélectionné n'est pas signé.")
+        Utils.temporisation()
+
     def show_event_creation_success(self):
         print("\nL'évènement a été créé avec succès.")
         Utils.temporisation()
@@ -102,11 +114,25 @@ class EventView:
         print("\nUne erreur s'est produite lors de la récupération des informations de l'évènement.")
         Utils.temporisation()
 
+    def prompt_assign_event_support(self, event):
+        Utils.clear()
+        print(f"--- Attribution du contact support pour l'évènement : {event.id} ---\n")
+
+        if event.support_contact:
+            support_contact = (f"{event.support_contact.firstname} {event.support_contact.name}")
+        else:
+            support_contact = "Non assigné"
+
+        support_contact_id = input(f"ID du contact support ({event.support_contact_id} - {support_contact}): ").strip()
+
+        if support_contact_id:
+            return {"support_contact_id": int(support_contact_id)}
+        return {"support_contact_id": event.support_contact_id}
+
     def prompt_update_event(self, event):
         Utils.clear()
         print(f"--- Modification de l'évènement : {event.id} ---\n")
 
-        contract_id = input(f"ID du contrat ({event.contract_id}): ").strip()
         start_date = input(f"Date de début (jj/mm/aaaa hh:mm:ss) ({event.start_date}) : ").strip()
         end_date = input(f"Date de fin (jj/mm/aaaa hh:mm:ss) ({event.end_date}) : ").strip()
         location = input("Localisation : ").strip()
@@ -114,7 +140,7 @@ class EventView:
         information = input("Information : ").strip()
 
         return {
-            "contract_id": contract_id or event.contract_id,
+            "support_contact_id": event.support_contact_id,
             "start_date": start_date or event.start_date,
             "end_date": end_date or event.end_date,
             "location": location or event.location,
@@ -124,6 +150,10 @@ class EventView:
 
     def show_event_modification_error(self):
         print("\nErreur lors de la modification de l'évènement.")
+        Utils.temporisation()
+
+    def show_not_support_user_error(self):
+        print("\nAssignation impossible, l'utilisateur sélectionné n'est pas du département SUPPORT.")
         Utils.temporisation()
 
     def show_event_modification_success(self):

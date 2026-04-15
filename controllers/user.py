@@ -80,9 +80,13 @@ class UserController:
 
             data = self.view.prompt_update_user(user)
 
-            if user.departement_id != data["departement_id"] and user.clients:
-                self.view.show_user_has_client_error()
-                return
+            if user.departement_id != data["departement_id"]:
+                if user.clients:
+                    self.view.show_user_has_client_error()
+                    return
+                if user.events:
+                    self.view.show_user_has_event_error()
+                    return
 
             user.name = data["name"]
             user.firstname = data["firstname"]
@@ -110,11 +114,11 @@ class UserController:
 
             if not user:
                 raise ValueError
-            if not self.view.confirm_user_deletion(user):
-                self.view.show_user_deletion_cancel()
-                return
             if user.clients:
                 self.view.show_user_has_client_error()
+                return
+            if not self.view.confirm_user_deletion(user):
+                self.view.show_user_deletion_cancel()
                 return
 
             self.session.delete(user)

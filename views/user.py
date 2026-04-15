@@ -109,6 +109,10 @@ class UserView:
         print("\nAction impossible, l'utilisateur est le contact d'un client.")
         Utils.temporisation()
 
+    def show_user_has_event_error(self):
+        print("\nAction impossible, l'utilisateur est le contact support pour un évènement.")
+        Utils.temporisation()
+
     def show_user_modification_success(self):
         print("\nUtilisateur modifié avec succès.")
         Utils.temporisation()
