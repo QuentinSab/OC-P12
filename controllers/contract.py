@@ -1,6 +1,7 @@
 from models.contract import Contract
 from database.session import SessionLocal
 from utils.permissions import permission_required
+from decimal import Decimal
 
 from views.utils import Utils
 from views.contract import ContractView
@@ -23,6 +24,13 @@ class ContractController:
     def create_contract(self):
         try:
             data = self.view.prompt_create_contract()
+
+            total_amount = Decimal(data["total_amount"])
+            payed_amount = Decimal(data["payed_amount"])
+
+            if payed_amount > total_amount:
+                self.view.show_invalid_amount_error()
+                return
 
             contract = Contract(**data)
 
@@ -102,6 +110,13 @@ class ContractController:
                 return
 
             data = self.view.prompt_update_contract(contract)
+
+            total_amount = Decimal(data["total_amount"])
+            payed_amount = Decimal(data["payed_amount"])
+
+            if payed_amount > total_amount:
+                self.view.show_invalid_amount_error()
+                return
 
             contract.client_id = data["client_id"]
             contract.total_amount = data["total_amount"]

@@ -26,6 +26,10 @@ class EventView:
         print("\nUne erreur s'est produite lors de la création de l'évènement.")
         Utils.temporisation()
 
+    def show_start_date_event_error(self):
+        print("\nErreur, la date de début de l'évènement ne peut pas être après sa date de fin.")
+        Utils.temporisation()
+
     def show_not_client_contact_error(self):
         print("\nCréation de l'évènement impossible, vous n'êtes pas le contact client du client de ce contrat.")
         Utils.temporisation()

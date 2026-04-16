@@ -22,6 +22,10 @@ class ContractView:
         print("\nUne erreur s'est produite lors de la création du contrat.")
         Utils.temporisation()
 
+    def show_invalid_amount_error(self):
+        print("\nErreur, le montant payé ne peut pas être supérieur au montant total du contrat.")
+        Utils.temporisation()
+
     def show_contract_creation_success(self):
         print("\nLe contrat a été créé avec succès.")
         Utils.temporisation()

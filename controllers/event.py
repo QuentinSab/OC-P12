@@ -3,6 +3,7 @@ from models.contract import Contract
 from models.user import User
 from database.session import SessionLocal
 from utils.permissions import permission_required
+from dateutil.parser import parse
 
 from views.utils import Utils
 from views.event import EventView
@@ -35,6 +36,13 @@ class EventController:
                 return
             if not contract.is_signed:
                 self.view.show_contract_not_signed_error()
+                return
+
+            start_date = parse(data["start_date"], dayfirst=True)
+            end_date = parse(data["end_date"], dayfirst=True)
+
+            if start_date >= end_date:
+                self.view.show_start_date_event_error()
                 return
 
             event = Event(**data)
@@ -113,7 +121,7 @@ class EventController:
                 data = self.view.prompt_assign_event_support(event)
 
                 selected_user = (self.session.query(User).filter_by(id=data["support_contact_id"]).first())
-                if (selected_user.departement.name != "SUPPORT"):
+                if not selected_user or selected_user.departement.name != "SUPPORT":
                     self.view.show_not_support_user_error()
                     return
 
@@ -121,6 +129,14 @@ class EventController:
 
             elif user_session_departement == "SUPPORT":
                 data = self.view.prompt_update_event(event)
+
+                start_date = parse(data["start_date"], dayfirst=True)
+                end_date = parse(data["end_date"], dayfirst=True)
+
+                if start_date >= end_date:
+                    self.view.show_start_date_event_error()
+                    return
+
                 event.start_date = data["start_date"]
                 event.end_date = data["end_date"]
                 event.location = data["location"]
