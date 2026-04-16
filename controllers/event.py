@@ -3,6 +3,7 @@ from models.contract import Contract
 from models.user import User
 from database.session import SessionLocal
 from utils.permissions import permission_required
+import sentry_sdk
 from dateutil.parser import parse
 
 from views.utils import Utils
@@ -53,8 +54,9 @@ class EventController:
 
         except ValueError:
             self.view.show_contract_not_found()
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_event_creation_error()
 
     @permission_required("can_read_event")
@@ -88,7 +90,8 @@ class EventController:
 
         except ValueError:
             self.view.show_no_event_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_event_list_error()
 
     @permission_required("can_read_event")
@@ -104,7 +107,8 @@ class EventController:
 
         except ValueError:
             self.view.show_event_not_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_event_detail_error()
 
     @permission_required("can_modify_event")
@@ -148,8 +152,9 @@ class EventController:
 
         except ValueError:
             self.view.show_event_not_found()
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_event_modification_error()
 
     def event_menu(self):

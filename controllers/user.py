@@ -4,7 +4,9 @@ from models.user import User
 from database.session import SessionLocal
 from utils.permissions import permission_required
 from utils.password import hash_password
+import sentry_sdk
 
+from utils.sentry import log_event
 from views.utils import Utils
 from views.user import UserView
 
@@ -32,10 +34,12 @@ class UserController:
 
             self.session.add(user)
             self.session.commit()
+            log_event("Création d'un utilisateur", user_id=user.id, departement=user.departement_id)
             self.view.show_user_creation_success()
 
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_user_creation_error()
 
     @permission_required("can_read_user")
@@ -50,7 +54,8 @@ class UserController:
 
         except ValueError:
             self.view.show_no_user_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_user_list_error()
 
     @permission_required("can_read_user")
@@ -66,7 +71,8 @@ class UserController:
 
         except ValueError:
             self.view.show_user_not_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_user_detail_error()
 
     @permission_required("can_modify_user")
@@ -98,12 +104,14 @@ class UserController:
                 user.password = hash_password(data["password"])
 
             self.session.commit()
+            log_event("Modification d'un utilisateur", user_id=user.id, departement=user.departement_id)
             self.view.show_user_modification_success()
 
         except ValueError:
             self.view.show_user_not_found()
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_user_modification_error()
 
     @permission_required("can_delete_user")
@@ -123,12 +131,14 @@ class UserController:
 
             self.session.delete(user)
             self.session.commit()
+            log_event("Suppression d'un utilisateur", user_id=user.id, departement=user.departement_id)
             self.view.show_user_deletion_success()
 
         except ValueError:
             self.view.show_user_not_found()
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_user_deletion_error()
 
     def user_menu(self):

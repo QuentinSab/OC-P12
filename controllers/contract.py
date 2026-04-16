@@ -1,7 +1,9 @@
 from models.contract import Contract
 from database.session import SessionLocal
 from utils.permissions import permission_required
+import sentry_sdk
 from decimal import Decimal
+from utils.sentry import log_event
 
 from views.utils import Utils
 from views.contract import ContractView
@@ -36,10 +38,18 @@ class ContractController:
 
             self.session.add(contract)
             self.session.commit()
+            if contract.is_signed:
+                log_event(
+                    "Signature d'un contrat",
+                    contract_id=contract.id,
+                    client_id=contract.client_id,
+                    user_id=self.user_session.user.id,
+                )
             self.view.show_contract_creation_success()
 
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_contract_creation_error()
 
     @permission_required("can_read_contract")
@@ -75,7 +85,8 @@ class ContractController:
 
         except ValueError:
             self.view.show_no_contract_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_contract_list_error()
 
     @permission_required("can_read_contract")
@@ -91,7 +102,8 @@ class ContractController:
 
         except ValueError:
             self.view.show_contract_not_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_contract_detail_error()
 
     @permission_required("can_modify_contract")
@@ -109,6 +121,7 @@ class ContractController:
                 self.view.show_not_client_contact_error()
                 return
 
+            was_signed = contract.is_signed
             data = self.view.prompt_update_contract(contract)
 
             total_amount = Decimal(data["total_amount"])
@@ -124,12 +137,20 @@ class ContractController:
             contract.is_signed = data["is_signed"]
 
             self.session.commit()
+            if not was_signed and contract.is_signed:
+                log_event(
+                    "Signature d'un contrat",
+                    contract_id=contract.id,
+                    client_id=contract.client_id,
+                    user_id=self.user_session.user.id,
+                )
             self.view.show_contract_modification_success()
 
         except ValueError:
             self.view.show_contract_not_found()
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_contract_modification_error()
 
     def contract_menu(self):

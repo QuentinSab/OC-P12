@@ -6,8 +6,20 @@ from controllers.user import UserController
 
 from views.menu import main_options
 
+import os
+import sentry_sdk
+from dotenv import load_dotenv
+
 
 def main():
+    load_dotenv()
+
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        send_default_pii=True,
+        enable_logs=True,
+    )
+
     while True:
         authentication_controller = AuthenticationController()
         user_session = authentication_controller.login()

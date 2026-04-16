@@ -1,6 +1,7 @@
 from models.client import Client
 from database.session import SessionLocal
 from utils.permissions import permission_required
+import sentry_sdk
 
 from views.utils import Utils
 from views.client import ClientView
@@ -31,8 +32,9 @@ class ClientController:
             self.session.commit()
             self.view.show_client_creation_success()
 
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_client_creation_error()
 
     @permission_required("can_read_client")
@@ -47,7 +49,8 @@ class ClientController:
 
         except ValueError:
             self.view.show_no_client_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_client_list_error()
 
     @permission_required("can_read_client")
@@ -63,7 +66,8 @@ class ClientController:
 
         except ValueError:
             self.view.show_client_not_found()
-        except Exception:
+        except Exception as exception:
+            sentry_sdk.capture_exception(exception)
             self.view.show_client_detail_error()
 
     @permission_required("can_modify_client")
@@ -91,8 +95,9 @@ class ClientController:
 
         except ValueError:
             self.view.show_client_not_found()
-        except Exception:
+        except Exception as exception:
             self.session.rollback()
+            sentry_sdk.capture_exception(exception)
             self.view.show_client_modification_error()
 
     def client_menu(self):
