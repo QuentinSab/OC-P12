@@ -63,7 +63,14 @@ class EventView:
                 f"Date: {event.start_date} -> {event.end_date}"
             )
 
-        Utils.temporisation()
+    def prompt_event_filter(self):
+        print("\n--- Filtres ---\n")
+        print("1 : Tous les évènements")
+        print("2 : Évènements non assignés")
+        print("3 : Mes évènements (contact support)")
+        print("0 : Retour")
+
+        return input("\nChoix: ")
 
     def show_no_event_found(self):
         print("\nAucun évènement n'a été trouvé.")

@@ -45,7 +45,15 @@ class ContractView:
                 f"Signé: {'Oui' if contract.is_signed else 'Non'}"
             )
 
-        Utils.temporisation()
+    def prompt_contract_filter(self):
+        print("\n--- Filtres contrats ---\n")
+        print("1: Tous les contrats")
+        print("2: Contrats non entièrement payés")
+        print("3: Contrats non signés")
+        print("4: Mes contrats (contact client)")
+        print("0: Retour")
+
+        return input("\nChoix: ").strip()
 
     def show_no_contract_found(self):
         print("\nAucun contrat n'a été trouvé.")

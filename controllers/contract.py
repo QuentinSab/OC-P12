@@ -37,12 +37,33 @@ class ContractController:
     @permission_required("can_read_contract")
     def list_contracts(self):
         try:
-            contracts = self.session.query(Contract).all()
+            query = self.session.query(Contract)
+            contracts = query.all()
 
             if not contracts:
                 raise ValueError
 
             self.view.show_contracts(contracts)
+
+            while True:
+                choice = self.view.prompt_contract_filter()
+
+                match choice:
+                    case "1":
+                        contracts = query.all()
+                    case "2":  # Contracts not fully paid
+                        contracts = query.filter(Contract.payed_amount < Contract.total_amount).all()
+                    case "3":  # Contracts not signed
+                        contracts = query.filter_by(is_signed=False).all()
+                    case "4":  # Client contact contracts
+                        contracts = query.join(Contract.client).filter_by(contact_id=self.user_session.user.id).all()
+                    case "0":
+                        break
+
+                if contracts:
+                    self.view.show_contracts(contracts)
+                else:
+                    self.view.show_no_contract_found()
 
         except ValueError:
             self.view.show_no_contract_found()
@@ -73,8 +94,10 @@ class ContractController:
 
             if not contract:
                 raise ValueError
-            if not (self.user_session.user.departement_id == 1  # not from GESTION department
-                    or contract.client.contact_id == self.user_session.user.id):  # nor client contact
+            if (
+                self.user_session.user.departement.name == "COMMERCIAL"
+                and contract.client.contact_id != self.user_session.user.id
+            ):
                 self.view.show_not_client_contact_error()
                 return
 

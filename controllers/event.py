@@ -52,12 +52,31 @@ class EventController:
     @permission_required("can_read_event")
     def list_events(self):
         try:
-            events = self.session.query(Event).all()
+            query = self.session.query(Event)
+            events = query.all()
 
             if not events:
                 raise ValueError
 
             self.view.show_events(events)
+
+            while True:
+                choice = self.view.prompt_event_filter()
+
+                match choice:
+                    case "1":
+                        events = query.all()
+                    case "2":  # Events without support contact
+                        events = query.filter_by(support_contact_id=None).all()
+                    case "3":  # Support contact events
+                        events = query.filter_by(support_contact_id=self.user_session.user.id).all()
+                    case "0":
+                        break
+
+                if events:
+                    self.view.show_events(events)
+                else:
+                    self.view.show_no_event_found()
 
         except ValueError:
             self.view.show_no_event_found()
