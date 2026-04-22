@@ -1,6 +1,7 @@
 from database.session import SessionLocal
 from models.user import User
 from models.departement import Departement
+from models.client import Client # noqa: F401 E261
 from utils.password import hash_password
 
 session = SessionLocal()
