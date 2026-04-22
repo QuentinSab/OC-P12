@@ -73,7 +73,7 @@ class ContractController:
                         contracts = query.filter(Contract.payed_amount < Contract.total_amount).all()
                     case "3":  # Contracts not signed
                         contracts = query.filter_by(is_signed=False).all()
-                    case "4":  # Client contact contracts
+                    case "4":  # User client contracts
                         contracts = query.join(Contract.client).filter_by(contact_id=self.user_session.user.id).all()
                     case "0":
                         break

@@ -78,7 +78,7 @@ class EventController:
                         events = query.all()
                     case "2":  # Events without support contact
                         events = query.filter_by(support_contact_id=None).all()
-                    case "3":  # Support contact events
+                    case "3":  # User events
                         events = query.filter_by(support_contact_id=self.user_session.user.id).all()
                     case "0":
                         break
