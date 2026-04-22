@@ -47,7 +47,7 @@ With the virtual environment activated, install the required packages listed in 
 
 ### 5. Configure environment variables
 
-Create a .env file at the root of the project:
+Create a ".env" file at the root of the project:
 
     DB_USER=username*
     DB_PASSWORD=password*
@@ -70,13 +70,35 @@ Finally, create data in the terminal with:
 
     python -m scripts.init_data
 
+
+![Database schema](docs/database_schema.png)
+
+### 7. Connect Sentry (optional)
+
+To activate Sentry:
+
+1. Create a new Python project in your Sentry account.
+2. Add the DSN provided by Sentry to your ".env" file:
+
+    SENTRY_DSN=sentry_dsn
+
 ## Usage
 
 ### 1. Running the program
 
 Run main.py to start the program:
 
-    python -m main.py
+    python -m main
 
 ### 2. Using the program
 
+You can log in using the following account:
+
+    - Email: "user@mail.com"
+    - Password: "password"
+
+This user is automatically created when running the initialization script ("init_data.py") and belongs to the "GESTION" department.
+
+### Permissions
+
+![Permissions](docs/permissions.png)
